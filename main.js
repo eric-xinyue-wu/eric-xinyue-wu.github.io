@@ -333,7 +333,10 @@
 
     const hero = document.querySelector('.hero');
     if (hero) new IntersectionObserver((es) => {
-      if (es[0].isIntersecting) links.forEach((a) => a.removeAttribute('aria-current'));
+      if (!es[0].isIntersecting) return;
+      links.forEach((a) => a.removeAttribute('aria-current'));
+      const home = byId.get('top');
+      if (home) home.setAttribute('aria-current', 'true');
     }, { rootMargin: '-40% 0px -55% 0px' }).observe(hero);
   }
 

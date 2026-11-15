@@ -146,6 +146,9 @@ button { font: inherit; color: inherit; }
   border-radius: 999px;
   transition: color .2s, background-color .2s;
 }
+.sections a.home { display: inline-flex; align-items: center; padding-inline: 11px; }
+.sections a.home svg { display: block; }
+.sections a.home::after { left: 11px; right: 11px; }
 .sections a:hover { color: var(--ink); background: var(--line-2); }
 .sections a[aria-current="true"] { color: var(--ink); }
 .sections a::after {
@@ -664,8 +667,9 @@ button { font: inherit; color: inherit; }
     border: 1px solid rgba(233, 237, 244, .16);
     box-shadow: 0 12px 30px -12px rgba(12, 19, 34, .5);
   }
+  .sections a.home { padding-inline: 10px; }
   .sections a {
-    padding: 10px 13px; font-size: 13.5px;
+    padding: 10px 11px; font-size: 13.5px;
     color: color-mix(in srgb, var(--paper) 68%, transparent);
   }
   .sections a:hover { background: transparent; color: var(--paper); }
@@ -714,4 +718,9 @@ button { font: inherit; color: inherit; }
   .copy { margin-left: 0; }
   .foot { flex-direction: column; }
   .foot::before { flex: none; width: 100%; }
+}
+
+@media (max-width: 400px) {
+  .sections a { padding: 10px 8px; font-size: 13px; }
+  .sections a.home { padding-inline: 9px; }
 }
