@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xinyue Wu · Market making and quantitative research</title>
+<meta name="description" content="Xinyue Wu (武新悦) studies mathematics and economics at NTU Singapore and works on market making and systematic strategies. Papers at ICAIF and NeurIPS 2026 workshops; internships at Nomura, CICC and CITIC Securities.">
+<meta name="author" content="Xinyue Wu">
+<link rel="canonical" href="https://eric-xinyue-wu.github.io/">
+<meta name="theme-color" content="#F3F4F2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#090D16" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Xinyue Wu · Market making and quantitative research">
+<meta property="og:description" content="Mathematics and economics at NTU Singapore. Papers at ICAIF and NeurIPS 2026 workshops; internships at Nomura, CICC and CITIC Securities.">
+<meta property="og:url" content="https://eric-xinyue-wu.github.io/">
+<meta property="og:image" content="https://eric-xinyue-wu.github.io/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600&text=%E6%AD%A6%E6%96%B0%E6%82%A6&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>document.documentElement.classList.add('js')</script>
+</head>
+<body>
+<a class="skip" href="#research">Skip to content</a>
+
+<header class="top" id="top">
+  <div class="top-in">
+    <a class="brand" href="#top" aria-label="Xinyue Wu, back to top">Xinyue Wu</a>
+    <nav class="sections" aria-label="Sections">
+      <a href="#research">Research</a>
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#about" class="hide-s">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="btn btn-sm" href="assets/Xinyue_Wu_Resume.pdf" target="_blank" rel="noopener">Résumé<span class="arr" aria-hidden="true">↓</span></a>
+  </div>
+</header>
+
+<main>
+
+<!-- ───────────── Hero ───────────── -->
+<section class="hero wrap" aria-labelledby="name">
+  <p class="eyebrow"><span>Mathematical Sciences &amp; Economics</span><span>NTU Singapore</span><span>Class of 2028</span></p>
+
+  <h1 class="name" id="name">
+    <span class="n1">Xinyue</span> <span class="n2">Wu<span class="seal" lang="zh-Hans" aria-label="武新悦">武新悦</span></span>
+  </h1>
+
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="lead">I study how a market maker sets its quotes, and what changes when a learned policy sets them instead.</p>
+      <p class="sub">Three workshop papers at ICAIF and NeurIPS 2026. Internships at Nomura, CICC and CITIC Securities.</p>
+      <div class="cta">
+        <a class="btn" href="#research">Read the research<span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-ghost" href="#contact">Get in touch</a>
+      </div>
+    </div>
+
+    <aside class="dealer" aria-labelledby="dealer-title">
+      <header class="dealer-head">
+        <span class="live"><i aria-hidden="true"></i><span id="dealer-title">A dealer, quoting live</span></span>
+        <span class="dealer-mid">mid <b id="d-mid">100.00</b></span>
+      </header>
+
+      <div class="chart">
+        <canvas id="chart" aria-hidden="true"></canvas>
+        <p class="sr-only">A scrolling chart of a simulated mid price with the dealer's bid below it and ask above it. Each trade moves the dealer's inventory, and the quotes shift against that inventory.</p>
+      </div>
+
+      <div class="ticket" role="group" aria-label="Trade against the dealer">
+        <button class="side bid" id="hit" type="button" aria-describedby="dealer-note">
+          <span class="side-top"><span class="verb">Sell</span><span class="tag">Bid</span></span>
+          <span class="px" id="d-bid">99.95</span>
+        </button>
+        <span class="spread" aria-hidden="true"><b id="d-spread">0.10</b></span>
+        <button class="side ask" id="lift" type="button" aria-describedby="dealer-note">
+          <span class="side-top"><span class="verb">Buy</span><span class="tag">Ask</span></span>
+          <span class="px" id="d-ask">100.05</span>
+        </button>
+      </div>
+
+      <dl class="readout">
+        <div>
+          <dt>Dealer inventory</dt>
+          <dd><span class="gauge" aria-hidden="true"><i id="g-fill"></i></span><b id="d-inv">0</b></dd>
+        </div>
+        <div>
+          <dt>Dealer P&amp;L</dt>
+          <dd><b id="d-pnl">+0.00</b></dd>
+        </div>
+        <div>
+          <dt>You</dt>
+          <dd><b id="d-you">flat</b></dd>
+        </div>
+      </dl>
+
+      <p class="dealer-note" id="dealer-note">
+        <strong>Trade against it.</strong> Sell a few lots and the dealer gets long, so it shades both quotes down until someone takes the position off.
+        That skew is the textbook rule,
+        <span class="formula" data-tex="r = s - q\,\gamma\sigma^{2}(T - t)"><i>r</i> = <i>s</i> − <i>q</i><i>γ</i><i>σ</i><sup>2</sup>(<i>T</i> − <i>t</i>)</span>.
+        <a href="#paper-1">My ICAIF paper</a> asks where a learned policy can replace it.
+      </p>
+    </aside>
+
+    <ul class="doors" aria-label="At a glance">
+      <li><a href="#research">
+        <span class="door-k">Research</span>
+        <span class="door-v">3 papers at ICAIF and NeurIPS&nbsp;2026 workshops</span>
+        <span class="door-a" aria-hidden="true">↓</span>
+      </a></li>
+      <li><a href="#experience">
+        <span class="door-k">Experience</span>
+        <span class="door-v">Nomura, CICC, CITIC&nbsp;Securities</span>
+        <span class="door-a" aria-hidden="true">↓</span>
+      </a></li>
+      <li><a href="#projects">
+        <span class="door-k">Trading</span>
+        <span class="door-v">Top 10%, Citadel Securities Trading Invitational APAC</span>
+        <span class="door-a" aria-hidden="true">↓</span>
+      </a></li>
+      <li><a href="#about">
+        <span class="door-k">Education</span>
+        <span class="door-v">GPA 4.94 / 5.00, Dean’s&nbsp;List</span>
+        <span class="door-a" aria-hidden="true">↓</span>
+      </a></li>
+    </ul>
+  </div>
+
+</section>
+
+<!-- ───────────── Research ───────────── -->
+<section class="section wrap" id="research" aria-labelledby="h-research">
+  <header class="sec-head reveal">
+    <h2 id="h-research">Research</h2>
+    <p>Three papers on one object: PolicyAttention, a Transformer whose softmax attention carries out policy mirror descent in context. Each asks where that holds up and where it breaks. Written with the Quantitative Research Society, which I co-founded at NTU in 2026.</p>
+  </header>
+
+  <article class="paper paper-lead reveal" id="paper-1">
+    <div class="paper-meta">
+      <span class="venue">ICAIF 2026</span>
+      <span>Workshop on AI-Driven Market Microstructure</span>
+      <span>Milan, November 2026</span>
+    </div>
+    <h3>Where Does Learned In-Context Policy Mirror Descent Pay Off in Market Making? <em>A Component Diagnosis</em></h3>
+    <p class="authors"><b>Xinyue Wu</b>, Yuhe Sui, Shufang Chen, Yingzhi Tang</p>
+    <p class="abstract">Returns hide which learned part of a market maker fails after a regime shift. We take a frozen Transformer that runs policy mirror descent in context, with a learned actor and a learned critic, and place it in a market small enough to solve exactly. Under fee, volatility, liquidity and toxicity stress we swap each learned part for its exact counterpart and measure value capture, not P&amp;L. Against the best fixed quoting rule, the learned loop wins under severe fee and toxicity stress and loses on nominal, volatile and illiquid markets.</p>
+    <figure class="swap" aria-labelledby="swap-cap">
+      <figcaption id="swap-cap">The test: replace one learned part with its exact version, and see what is lost.</figcaption>
+      <div class="swap-grid" role="img" aria-label="A two-by-two design. Learned actor with learned critic: the full loop. Learned actor with exact critic: actor only. Exact actor with learned critic: critic only. Both exact: exact TD-PMD, the reference.">
+        <span class="sw-h sw-top">Critic</span>
+        <span class="sw-c1">learned</span><span class="sw-c2">exact</span>
+        <span class="sw-h sw-left">Actor</span>
+        <span class="sw-r1">learned</span><span class="sw-r2">exact</span>
+        <span class="cell c-full"><b>Full loop</b><i>both parts learned</i></span>
+        <span class="cell c-actor"><b>Actor only</b><i>what the actor costs</i></span>
+        <span class="cell c-critic"><b>Critic only</b><i>what the critic costs</i></span>
+        <span class="cell c-exact"><b>Exact TD-PMD</b><i>the reference</i></span>
+      </div>
+    </figure>
+    <dl class="findings">
+      <div><dt>Actor</dt><dd>Stays within margin on all nine market families.</dd></div>
+      <div><dt>Critic</dt><dd>Gives up value on every one of them.</dd></div>
+      <div><dt>So</dt><dd>Improve the critic stage first.</dd></div>
+    </dl>
+    <p class="links">
+      <a class="link" href="https://ericwu666666.github.io/icaif26-pmd-market-making/" target="_blank" rel="noopener">Project page<span aria-hidden="true">↗</span></a>
+      <a class="link" href="https://icaif2026.org/workshop-papers/#paper-ai-market-microstructure-1245" target="_blank" rel="noopener">ICAIF listing<span aria-hidden="true">↗</span></a>
+    </p>
+  </article>
+
+  <div class="paper-pair">
+    <article class="paper reveal" id="paper-2">
+      <div class="paper-meta"><span class="venue">NeurIPS 2026</span><span>EvoRobust workshop</span></div>
+      <h3>PolicyAttention: Robustness and Failure Modes of Softmax Policy Improvement</h3>
+      <p class="authors">Yuhe Sui, Yingzhi Tang, <b>Xinyue Wu</b></p>
+      <p class="abstract">A softmax policy update can be exact on paper and brittle once implemented, because finite attention leaks across groups of states. We give a certificate that bounds how far the returned policy can be from optimal given actor and critic error, and an exact boundary beyond which a stronger update makes the policy worse.</p>
+      <dl class="findings two">
+        <div><dt>Holds while</dt><dd><span class="formula" data-tex="\eta c < (1 - \gamma)\,\kappa"><i>η</i><i>c</i> &lt; (1 − <i>γ</i>)<i>κ</i></span><small>step size × reward scale, against routing margin</small></dd></div>
+        <div><dt>Past it</dt><dd>Tripling the step lifts the ideal gain from 0.950 to 2.084 and turns the implemented gain from +0.916 to −2.009.</dd></div>
+      </dl>
+    </article>
+    <article class="paper reveal" id="paper-3">
+      <div class="paper-meta"><span class="venue">ICAIF 2026</span><span>IAFM workshop</span></div>
+      <h3>PolicyAttention: A Certifiable and Testable Update Rule for Attention-Based Allocation Controllers</h3>
+      <p class="authors">Shufang Chen, Yuhe Sui, Yingzhi Tang, <b>Xinyue Wu</b></p>
+      <p class="abstract">An allocation controller can look like policy mirror descent without obeying it. An exact identity turns the claim into something testable: it predicts two response slopes and no reaction when every action value shifts by the same amount. We test five trained Transformers in a synthetic allocation problem with four regimes and three exposures.</p>
+      <dl class="findings two">
+        <div><dt>Slopes</dt><dd>All five match both, with median errors under 0.5%.</dd></div>
+        <div><dt>Shift invariance</dt><dd>All five fail it, by a small but systematic amount.</dd></div>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- ───────────── Experience ───────────── -->
+<section class="section wrap" id="experience" aria-labelledby="h-experience">
+  <header class="sec-head reveal">
+    <h2 id="h-experience">Experience</h2>
+    <p>An institutional equity desk, a sell-side research team and a structured-products group.</p>
+  </header>
+
+  <div class="rows">
+    <article class="row reveal">
+      <p class="when">Aug – Oct 2026</p>
+      <div class="what">
+        <h3>Nomura</h3>
+        <p class="role">Institutional Equity Intern</p>
+      </div>
+      <ul class="detail">
+        <li>Built an AI-agent workflow that pulls Wind and Bloomberg data, searches news and checks its sources to draft the desk’s daily cross-asset update across the US, Japan, Hong Kong and mainland China.</li>
+        <li>Studied overnight spillovers into CSI 300 opening gaps over <b>4,666</b> A-share trading days since 2005. S&amp;P 500 returns and the KOSPI morning gap were the key signals, with a <b>70%</b> directional hit rate, and fed the desk’s pre-open view.</li>
+        <li>Tracked intraday moves, sector flows, block trades and order-book activity; compiled daily IOIs and liquidity data; wrote pre-open, intraday and post-close commentary.</li>
+      </ul>
+    </article>
+
+    <article class="row reveal">
+      <p class="when">Jun – Aug 2026</p>
+      <div class="what">
+        <h3>CICC</h3>
+        <p class="role">Equity Research Intern, AI &amp; Robotics</p>
+      </div>
+      <ul class="detail">
+        <li>Prepared initiation research on a robotics manufacturer and a high-end equipment company: businesses, products, competitors and earnings drivers.</li>
+        <li>Worked out the cost impact of making motors, reducers and dexterous hands in-house, and why gross margin rose from <b>44.8%</b> to <b>60.4%</b> while humanoid selling prices fell.</li>
+      </ul>
+    </article>
+
+    <article class="row reveal">
+      <p class="when">Jul – Aug 2023</p>
+      <div class="what">
+        <h3>CITIC Securities</h3>
+        <p class="role">Asset Management Intern, Derivatives &amp; Structured Products</p>
+      </div>
+      <ul class="detail">
+        <li>Priced GLD-linked snowballs and other structured products with Monte Carlo models, checked dealer quotes, and compared Greeks and simulated payoffs across knock-in and knock-out levels.</li>
+        <li>Compared mean-variance, Black-Litterman and risk-parity allocations, and calculated hedge ratios and residual beta for market-neutral portfolios.</li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ───────────── Projects ───────────── -->
+<section class="section wrap" id="projects" aria-labelledby="h-projects">
+  <header class="sec-head reveal">
+    <h2 id="h-projects">Projects</h2>
+    <p>Strategies, a research society, a trading competition and one side project.</p>
+  </header>
+
+  <div class="rows">
+    <article class="row reveal">
+      <p class="when">May 2026 – now</p>
+      <div class="what">
+        <h3>ETF rotation and a backtesting workflow</h3>
+        <p class="role">Quantitative Strategy Research Assistant, NTU</p>
+      </div>
+      <ul class="detail">
+        <li>A rotation strategy across <b>50+</b> sector and thematic ETFs. Each month Spearman IC picks the ranking method behind the weekly momentum ranks; entries, stops, profit-taking and trailing stops are rule-based.</li>
+        <li>A multi-agent backtesting workflow on daily data from 2016 to 2026, testing <b>200+</b> configurations with out-of-sample validation and transaction costs to keep overfitting in check.</li>
+      </ul>
+    </article>
+
+    <article class="row reveal">
+      <p class="when">Jan 2026 – now</p>
+      <div class="what">
+        <h3>Quantitative Research Society</h3>
+        <p class="role">Co-founder, NTU</p>
+      </div>
+      <ul class="detail">
+        <li>A student research society in quantitative finance and machine learning, running programmes in market microstructure, reinforcement learning and risk. Member work: <b>three</b> papers accepted at ICAIF and NeurIPS 2026 workshops.</li>
+        <li>I led the market-making study: an exactly solvable dealer market over inventory and order-flow imbalance, used to diagnose which learned component fails after a fee, volatility or liquidity shift.</li>
+      </ul>
+    </article>
+
+    <article class="row reveal">
+      <p class="when">Apr 2025</p>
+      <div class="what">
+        <h3>Citadel Securities Trading Invitational, APAC</h3>
+        <p class="role">Competitor</p>
+      </div>
+      <ul class="detail">
+        <li>Market making, statistical arbitrage and options pricing. Finished in the <b>top 10%</b> of 100+ selected participants.</li>
+        <li>Wrote a Python market maker for synthetic instruments that adjusts its spread to order-flow imbalance and its own inventory. The panel at the top of this page is its simplest relative.</li>
+      </ul>
+    </article>
+
+    <article class="row reveal">
+      <p class="when">Open source</p>
+      <div class="what">
+        <h3>ntulearn-digest</h3>
+        <p class="role">Side project</p>
+      </div>
+      <ul class="detail">
+        <li>Syncs NTULearn into a calendar, a deadline dashboard and course notes an AI assistant can read.
+          <a class="link" href="https://github.com/ericwu666666/ntulearn-digest" target="_blank" rel="noopener">Code on GitHub<span aria-hidden="true">↗</span></a></li>
+      </ul>
+    </article>
+  </div>
+</section>
+
+<!-- ───────────── About ───────────── -->
+<section class="section wrap" id="about" aria-labelledby="h-about">
+  <header class="sec-head reveal">
+    <h2 id="h-about">About</h2>
+    <p>Olympiad maths and physics came first, then markets. Now I work where the two meet.</p>
+  </header>
+
+  <div class="about reveal">
+    <div class="about-main">
+      <p class="label">Education</p>
+      <h3>Nanyang Technological University</h3>
+      <p class="role">BSc Mathematical Sciences and Economics<br>Aug 2024 – May 2028 (expected)</p>
+      <p class="about-p">GPA <b>4.94 / 5.00</b>, Dean’s List. Coursework in stochastic processes, financial econometrics, options and derivatives pricing, and time series analysis.</p>
+    </div>
+    <dl class="facts">
+      <div><dt>Awards</dt><dd>AMC 12 Distinguished Honor Roll (top 1% globally)<br>AIME 13 / 15<br>Chinese Physics Olympiad, First Prize</dd></div>
+      <div><dt>Code</dt><dd>Python, C++, MATLAB, R, SQL</dd></div>
+      <div><dt>Tools</dt><dd>Bloomberg, S&amp;P Capital IQ, agentic AI workflows</dd></div>
+      <div><dt>Languages</dt><dd>Mandarin (native), English (IELTS 8.0), Cantonese (fluent), French (advanced)</dd></div>
+      <div><dt>Off the desk</dt><dd>Mahjong and poker for the incomplete information; golf and tennis for everything else.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ───────────── Contact ───────────── -->
+<section class="section wrap contact" id="contact" aria-labelledby="h-contact">
+  <p class="label reveal">Contact</p>
+  <h2 id="h-contact" class="reveal">Looking for summer 2027 internships in trading and quantitative research.</h2>
+  <div class="contact-row reveal">
+    <a class="mail" href="mailto:ericyueyue@outlook.com">ericyueyue@outlook.com</a>
+    <button class="copy" type="button" id="copy" data-copy="ericyueyue@outlook.com">Copy</button>
+  </div>
+  <ul class="contact-links reveal">
+    <li><a class="link" href="https://www.linkedin.com/in/eric-xinyue-wu" target="_blank" rel="noopener">LinkedIn<span aria-hidden="true">↗</span></a></li>
+    <li><a class="link" href="https://github.com/ericwu666666" target="_blank" rel="noopener">GitHub<span aria-hidden="true">↗</span></a></li>
+    <li><a class="link" href="assets/Xinyue_Wu_Resume.pdf" target="_blank" rel="noopener">Résumé (PDF)<span aria-hidden="true">↓</span></a></li>
+  </ul>
+</section>
+
+</main>
+
+<footer class="foot wrap">
+  <p>© 2026 Xinyue Wu <span lang="zh-Hans">武新悦</span> · Singapore</p>
+  <p>Set in Newsreader and Geist. No cookies, no trackers.</p>
+  <a href="#top">Back to top ↑</a>
+</footer>
+
+<script src="main.js" defer></script>
+<script>
+  // Formulas are typeset with MathJax (TeX to SVG). Until it loads, or if it cannot, the hand-set HTML stays.
+  window.MathJax = {
+    options: { enableMenu: false },
+    svg: { fontCache: 'none' },
+    startup: {
+      typeset: false,
+      ready() {
+        MathJax.startup.defaultReady();
+        document.head.appendChild(MathJax.svgStylesheet());
+        document.querySelectorAll('[data-tex]').forEach((el) => {
+          try { el.replaceChildren(MathJax.tex2svg(el.dataset.tex, { display: false })); el.classList.add('mj'); } catch (e) {}
+        });
+      }
+    }
+  };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+</body>
+</html>
