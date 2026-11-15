@@ -397,7 +397,7 @@ button { font: inherit; color: inherit; }
 /* ───────────── Doors ───────────── */
 
 .doors {
-  grid-area: doors; align-self: end;
+  grid-area: doors; align-self: start;
   margin-top: clamp(32px, 3.6vw, 48px);
   border-top: 1px solid var(--line);
 }
@@ -434,6 +434,7 @@ button { font: inherit; color: inherit; }
   line-height: .98; letter-spacing: -.03em;
 }
 .sec-head p { color: var(--ink-2); max-width: 36em; padding-bottom: .35em; text-wrap: pretty; }
+.sec-head { padding-bottom: clamp(18px, 2.2vw, 28px); }
 
 /* Papers */
 
@@ -531,6 +532,15 @@ button { font: inherit; color: inherit; }
   border-bottom: 1px solid var(--line-2);
 }
 .when { padding-top: .62em; }
+
+/* Brief rows: date, company, role on one line */
+.rows-brief .row { align-items: baseline; padding-block: clamp(20px, 2.4vw, 28px); }
+.rows-brief .when { padding-top: 0; }
+.rows-brief h3 {
+  font-family: var(--serif); font-weight: 420;
+  font-size: 1.62rem; line-height: 1.15; letter-spacing: -.016em;
+}
+.rows-brief .role { margin-top: 0; font-size: 16.5px; color: var(--ink-2); }
 .what h3 {
   font-family: var(--serif); font-weight: 420;
   font-size: 1.62rem; line-height: 1.15; letter-spacing: -.016em;
@@ -635,6 +645,7 @@ button { font: inherit; color: inherit; }
   .hero-copy { max-width: 40rem; }
   .row { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); }
   .row .detail { grid-column: 2; margin-top: 16px; }
+  .rows-brief .role { grid-column: 2; margin-top: 6px; }
   .chart { height: 240px; }
 }
 
@@ -696,6 +707,8 @@ button { font: inherit; color: inherit; }
 
   .row { grid-template-columns: 1fr; }
   .row .detail { grid-column: 1; }
+  .rows-brief .role { grid-column: 1; }
+  .rows-brief .when { margin-bottom: 6px; }
   .when { padding-top: 0; margin-bottom: 10px; }
   .facts > div { grid-template-columns: 1fr; gap: 4px; }
   .copy { margin-left: 0; }
