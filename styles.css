@@ -537,7 +537,7 @@ button { font: inherit; color: inherit; }
 .when { padding-top: .62em; }
 
 /* Brief rows: date, company, role on one line */
-.rows-brief .row { grid-template-columns: minmax(0, 2fr) minmax(0, 5fr) minmax(0, 5fr); align-items: baseline; padding-block: clamp(20px, 2.4vw, 28px); }
+.rows-brief .row { grid-template-columns: minmax(0, 1.6fr) minmax(0, 4.9fr) minmax(0, 5.5fr); align-items: baseline; padding-block: clamp(20px, 2.4vw, 28px); }
 .rows-brief .when { padding-top: 0; }
 .rows-brief h3 {
   font-family: var(--serif); font-weight: 420;
