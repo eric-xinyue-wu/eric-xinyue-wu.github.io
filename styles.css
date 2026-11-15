@@ -537,13 +537,13 @@ button { font: inherit; color: inherit; }
 .when { padding-top: .62em; }
 
 /* Brief rows: date, company, role on one line */
-.rows-brief .row { align-items: baseline; padding-block: clamp(20px, 2.4vw, 28px); }
+.rows-brief .row { grid-template-columns: minmax(0, 2fr) minmax(0, 5fr) minmax(0, 5fr); align-items: baseline; padding-block: clamp(20px, 2.4vw, 28px); }
 .rows-brief .when { padding-top: 0; }
 .rows-brief h3 {
   font-family: var(--serif); font-weight: 420;
   font-size: 1.62rem; line-height: 1.15; letter-spacing: -.016em;
 }
-.rows-brief .role { margin-top: 0; font-size: 16.5px; color: var(--ink-2); }
+.rows-brief .role { margin-top: 0; font-size: 16.5px; color: var(--ink-2); text-wrap: wrap; }
 .what h3 {
   font-family: var(--serif); font-weight: 420;
   font-size: 1.62rem; line-height: 1.15; letter-spacing: -.016em;
@@ -648,6 +648,7 @@ button { font: inherit; color: inherit; }
   .hero-copy { max-width: 40rem; }
   .row { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); }
   .row .detail { grid-column: 2; margin-top: 16px; }
+  .rows-brief .row { grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); }
   .rows-brief .role { grid-column: 2; margin-top: 6px; }
   .chart { height: 240px; }
 }
@@ -711,6 +712,7 @@ button { font: inherit; color: inherit; }
 
   .row { grid-template-columns: 1fr; }
   .row .detail { grid-column: 1; }
+  .rows-brief .row { grid-template-columns: 1fr; }
   .rows-brief .role { grid-column: 1; }
   .rows-brief .when { margin-bottom: 6px; }
   .when { padding-top: 0; margin-bottom: 10px; }
