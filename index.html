@@ -23,7 +23,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600&text=%E6%AD%A6%E6%96%B0%E6%82%A6&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
-<script>document.documentElement.classList.add('js')</script>
+<script>
+  // Motion needs main.js. If it never arrives, drop the class so nothing stays hidden.
+  document.documentElement.classList.add('js');
+  setTimeout(function () { if (!window.__site) document.documentElement.classList.remove('js'); }, 3000);
+</script>
 </head>
 <body>
 <a class="skip" href="#research">Skip to content</a>
@@ -49,14 +53,14 @@
 
 <!-- ───────────── Hero ───────────── -->
 <section class="hero wrap" aria-labelledby="name">
-  <p class="eyebrow"><span>Mathematical Sciences &amp; Economics</span><span>NTU Singapore</span><span>Class of 2028</span></p>
+  <p class="eyebrow enter" style="--d:0"><span>Mathematical Sciences &amp; Economics</span><span>NTU Singapore</span><span>Class of 2028</span></p>
 
-  <h1 class="name" id="name">
+  <h1 class="name enter" id="name" style="--d:1">
     <span class="n1">Xinyue</span> <span class="n2">Wu<span class="seal" lang="zh-Hans" aria-label="武新悦">武新悦</span></span>
   </h1>
 
   <div class="hero-grid">
-    <div class="hero-copy">
+    <div class="hero-copy enter" style="--d:2">
       <p class="lead">I study how a market maker sets its quotes, and what changes when a learned policy sets them instead.</p>
       <div class="cta">
         <a class="btn" href="#research">Read the research<span class="arr" aria-hidden="true">→</span></a>
@@ -64,7 +68,7 @@
       </div>
     </div>
 
-    <aside class="dealer" aria-labelledby="dealer-title">
+    <aside class="dealer enter" aria-labelledby="dealer-title" style="--d:3">
       <header class="dealer-head">
         <span class="live"><i aria-hidden="true"></i><span id="dealer-title">A dealer, quoting live</span></span>
         <span class="dealer-mid">mid <b id="d-mid">100.00</b></span>
@@ -110,7 +114,7 @@
       </p>
     </aside>
 
-    <ul class="doors" aria-label="At a glance">
+    <ul class="doors enter" aria-label="At a glance" style="--d:4">
       <li><a href="#research">
         <span class="door-k">Research</span>
         <span class="door-v">3 papers at ICAIF and NeurIPS&nbsp;2026 workshops</span>

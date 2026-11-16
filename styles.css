@@ -31,6 +31,7 @@
   --gutter: clamp(16px, 4vw, 48px);
   --top-h: 64px;
   --ease: cubic-bezier(.2, .7, .2, 1);
+  --glide: cubic-bezier(.22, 1, .36, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -74,6 +75,7 @@ body {
 ::selection { background: var(--bid); color: #fff; }
 
 a { color: inherit; text-decoration: none; }
+a, button { -webkit-tap-highlight-color: transparent; }
 h1, h2, h3, p, ul, dl, dd, figure { margin: 0; }
 ul { padding: 0; list-style: none; }
 b, strong { font-weight: 600; }
@@ -138,26 +140,32 @@ button { font: inherit; color: inherit; }
 .js .brand { opacity: 0; transform: translateY(6px); pointer-events: none; }
 .js .top.past-name .brand { opacity: 1; transform: none; pointer-events: auto; }
 
-.sections { display: flex; gap: 4px; }
+.sections { position: relative; display: flex; gap: 4px; }
 .sections a {
-  position: relative;
+  position: relative; z-index: 1;
   padding: 8px 14px;
   font-size: 14.5px; color: var(--ink-2);
   border-radius: 999px;
-  transition: color .2s, background-color .2s;
+  transition: color .3s, background-color .3s;
 }
 .sections a.home { display: inline-flex; align-items: center; padding-inline: 11px; }
 .sections a.home svg { display: block; }
-.sections a.home::after { left: 11px; right: 11px; }
 .sections a:hover { color: var(--ink); background: var(--line-2); }
-.sections a[aria-current="true"] { color: var(--ink); }
-.sections a::after {
-  content: ""; position: absolute; left: 14px; right: 14px; bottom: 3px; height: 1.5px;
-  background: var(--ask);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform .35s var(--ease);
+.sections a.is-lit { color: var(--ink); }
+
+/* The marker under the current section. It is one element, so it slides
+   from item to item instead of blinking off and on. */
+.nav-ind {
+  position: absolute; left: 0; top: 0; bottom: 0; z-index: 0;
+  width: var(--iw, 0); transform: translateX(var(--ix, 0));
+  opacity: 0; pointer-events: none;
 }
-.sections a[aria-current="true"]::after { transform: scaleX(1); }
+.nav-ind.on { transition: transform .55s var(--glide), width .55s var(--glide), opacity .3s; }
+.nav-ind::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 3px; height: 1.5px;
+  background: var(--ask); border-radius: 1px;
+}
+.nav-ind.is-home::after { left: 11px; right: 11px; }
 
 /* ───────────── Buttons and links ───────────── */
 
@@ -168,25 +176,26 @@ button { font: inherit; color: inherit; }
   border: 1px solid var(--ink); border-radius: 999px;
   font-size: 15.5px; font-weight: 500; line-height: 1;
   white-space: nowrap;
-  transition: transform .2s var(--ease), background-color .2s, color .2s;
+  transition: transform .35s var(--glide), background-color .3s, border-color .3s, color .3s;
 }
-.btn .arr { display: inline-block; transition: transform .25s var(--ease); }
+.btn .arr { display: inline-block; transition: transform .4s var(--glide); }
 .btn:hover .arr { transform: translateX(3px); }
 .btn-sm .arr, .door-a { font-family: var(--mono); }
 .btn-sm:hover .arr { transform: translateY(2px); }
-.btn:active { transform: scale(.98); }
+.btn:hover { background: color-mix(in srgb, var(--ink) 86%, var(--paper)); border-color: transparent; }
+.btn:active { transform: scale(.97); transition-duration: .12s; }
 .btn-sm { padding: 10px 16px; font-size: 14px; gap: 7px; }
 .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn-ghost:hover { border-color: var(--ink); }
+.btn-ghost:hover { background: transparent; border-color: var(--ink); }
 
 .link {
   display: inline-flex; align-items: baseline; gap: 5px;
   color: var(--ink); font-weight: 500;
   background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
   padding-bottom: 1px;
-  transition: color .2s, background-size .3s var(--ease);
+  transition: color .3s, background-size .4s var(--glide);
 }
-.link span { font-family: var(--mono); font-size: .85em; transition: transform .25s var(--ease); display: inline-block; }
+.link span { font-family: var(--mono); font-size: .85em; transition: transform .4s var(--glide); display: inline-block; }
 .link:hover { color: var(--bid); }
 .link:hover span { transform: translate(2px, -2px); }
 
@@ -307,15 +316,15 @@ button { font: inherit; color: inherit; }
   border: 1px solid color-mix(in srgb, var(--c) 34%, transparent);
   border-radius: 12px;
   cursor: pointer; text-align: left;
-  transition: background-color .18s, border-color .18s, transform .12s var(--ease);
+  transition: background-color .3s, border-color .3s, transform .25s var(--glide);
   -webkit-tap-highlight-color: transparent;
 }
 .side.ask { --c: var(--ask-d); text-align: right; }
 .side:hover { background: color-mix(in srgb, var(--c) 20%, transparent); border-color: color-mix(in srgb, var(--c) 70%, transparent); }
-.side:active { transform: scale(.985); }
+.side:active { transform: scale(.98); transition-duration: .1s; }
 .side:focus-visible { outline-color: var(--c); border-radius: 12px; }
 .side[disabled] { opacity: .4; cursor: not-allowed; }
-.side.flash { animation: flash .5s var(--ease); }
+.side.flash { animation: flash .7s var(--glide); }
 @keyframes flash { 0% { background: color-mix(in srgb, var(--c) 55%, transparent); } }
 
 .side-top { display: flex; justify-content: space-between; align-items: baseline; }
@@ -357,6 +366,7 @@ button { font: inherit; color: inherit; }
   font-family: var(--mono); font-size: 14.5px; font-variant-numeric: tabular-nums;
 }
 .readout b { font-weight: 500; white-space: nowrap; }
+.readout b { transition: color .4s; }
 .readout .pos { color: #58DDA6; }
 .readout .neg { color: var(--ask-d); }
 
@@ -371,7 +381,7 @@ button { font: inherit; color: inherit; }
 .gauge i {
   position: absolute; top: 0; bottom: 0; left: 50%; width: 0;
   background: var(--bid-d); border-radius: 3px;
-  transition: width .35s var(--ease), left .35s var(--ease), background-color .2s;
+  transition: width .6s var(--glide), left .6s var(--glide), background-color .4s;
 }
 
 .dealer-note {
@@ -410,14 +420,16 @@ button { font: inherit; color: inherit; }
   display: grid; grid-template-columns: 6.6rem minmax(0, 1fr) auto;
   align-items: baseline; column-gap: 12px;
   padding: 13px 6px 13px 2px;
-  transition: background-color .25s, padding .3s var(--ease);
+  transition: background-color .35s;
 }
-.doors a:hover { background: var(--line-2); padding-left: 10px; }
+.door-k, .door-v { transition: transform .45s var(--glide); }
+.doors a:hover, .doors a:active { background: var(--line-2); }
+.doors a:hover .door-k, .doors a:hover .door-v { transform: translateX(6px); }
 .door-v {
   font-family: var(--serif); font-size: 1.13rem; line-height: 1.25; letter-spacing: -.006em;
   text-wrap: balance;
 }
-.door-a { font-size: 13px; color: var(--ink-3); transition: transform .3s var(--ease), color .2s; }
+.door-a { font-size: 13px; color: var(--ink-3); transition: transform .45s var(--glide), color .3s; }
 .doors a:hover .door-a { transform: translateY(3px); color: var(--ask); }
 
 /* ───────────── Sections ───────────── */
@@ -611,7 +623,7 @@ button { font: inherit; color: inherit; }
   padding: 9px 16px; min-width: 76px;
   background: transparent; border: 1px solid var(--line); border-radius: 999px;
   font-size: 14px; cursor: pointer;
-  transition: border-color .2s, background-color .2s, color .2s;
+  transition: border-color .3s, background-color .3s, color .3s;
 }
 .copy:hover { border-color: var(--ink); }
 .copy.done { background: var(--ink); color: var(--paper); border-color: var(--ink); }
@@ -630,12 +642,21 @@ button { font: inherit; color: inherit; }
 
 /* ───────────── Motion ───────────── */
 
-.js .reveal { opacity: 0; transform: translateY(14px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.js .reveal { opacity: 0; transform: translateY(10px); transition: opacity .9s var(--glide), transform .9s var(--glide); }
+
+/* First paint: the hero settles in once the type has loaded. */
+.js .enter { opacity: 0; transform: translateY(10px); }
+.js.ready .enter {
+  opacity: 1; transform: none;
+  transition: opacity .9s var(--glide) calc(var(--d, 0) * 80ms), transform 1s var(--glide) calc(var(--d, 0) * 80ms);
+}
+.formula.mj { animation: settle .5s var(--glide); }
+@keyframes settle { from { opacity: 0; } }
 .js .reveal.in { opacity: 1; transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .js .reveal, .js .enter { opacity: 1; transform: none; transition: none; }
   .live i { animation: none; }
   * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
@@ -674,8 +695,9 @@ button { font: inherit; color: inherit; }
     color: color-mix(in srgb, var(--paper) 68%, transparent);
   }
   .sections a:hover { background: transparent; color: var(--paper); }
-  .sections a[aria-current="true"] { color: var(--ink); background: var(--paper); }
-  .sections a::after { display: none; }
+  .sections a.is-lit, .sections a.is-lit:hover { color: var(--ink); }
+  .nav-ind { top: 5px; bottom: 5px; background: var(--paper); border-radius: 999px; }
+  .nav-ind::after { display: none; }
   .hide-s { display: none; }
 
   .name { font-size: clamp(4.6rem, 26vw, 8.4rem); line-height: .84; }

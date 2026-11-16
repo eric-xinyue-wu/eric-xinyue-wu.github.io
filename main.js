@@ -33,6 +33,7 @@
     let yLo = 99.8, yHi = 100.2;
     let W = 0, H = 0, dpr = 1;
     let visible = true, ranged = false;
+    const chipY = { a: null, b: null };
 
     const el = {
       mid: $('d-mid'), bid: $('d-bid'), ask: $('d-ask'), spread: $('d-spread'),
@@ -83,7 +84,7 @@
         q -= 1; cash += a; you.q += 1; you.cash -= a;
       }
       you.trades += 1;
-      record([{ side, px: side === 'b' ? b : a, me: true }]);
+      record([{ side, px: side === 'b' ? b : a, me: true, t: performance.now() }]);
       lastTick = performance.now();
       const btn = side === 'b' ? el.hit : el.lift;
       btn.classList.remove('flash');
@@ -223,7 +224,10 @@
       ctx.beginPath();
       for (let i = first; i < n; i++) {
         const x = xAt(i), y = yAt(hist[i].s);
-        if (i === first) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        if (i === first) { ctx.moveTo(x, y); continue; }
+        const px = xAt(i - 1), py = yAt(hist[i - 1].s);
+        ctx.quadraticCurveTo(px, py, (px + x) / 2, (py + y) / 2);
+        if (i === n - 1) ctx.lineTo(x, y);
       }
       ctx.strokeStyle = C.mid; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
       ctx.stroke(); ctx.setLineDash([]);
@@ -235,6 +239,13 @@
           const x = xAt(i), y = yAt(f.px);
           const color = f.side === 'a' ? C.ask : C.bid;
           if (f.me) {
+            const age = (now - f.t) / 900;
+            if (age >= 0 && age < 1 && !reduceMotion) {
+              const k = 1 - Math.pow(1 - age, 3);
+              ctx.beginPath(); ctx.arc(x, y, 9 + 16 * k, 0, 6.2832);
+              ctx.strokeStyle = color; ctx.globalAlpha = 0.5 * (1 - age); ctx.lineWidth = 1.5;
+              ctx.stroke(); ctx.globalAlpha = 1;
+            }
             ctx.beginPath(); ctx.arc(x, y, 9, 0, 6.2832);
             ctx.fillStyle = f.side === 'a' ? 'rgba(255,125,97,.22)' : 'rgba(124,149,255,.22)';
             ctx.fill();
@@ -256,8 +267,11 @@
       // Keep the two chips from overlapping when the spread is visually small.
       const gap = 18 - (yb - ya);
       const off = gap > 0 ? gap / 2 : 0;
-      const chipAt = (p, shift, color, textColor) => {
-        const y = yAt(p) + shift, w = 46, h = 17, x = plotW + 5;
+      const settle = reduceMotion ? 1 : 0.2;
+      chipY.a = chipY.a === null ? ya - off : chipY.a + (ya - off - chipY.a) * settle;
+      chipY.b = chipY.b === null ? yb + off : chipY.b + (yb + off - chipY.b) * settle;
+      const chipAt = (p, y, color, textColor) => {
+        const w = 46, h = 17, x = plotW + 5;
         ctx.fillStyle = color;
         ctx.beginPath();
         if (ctx.roundRect) ctx.roundRect(x, y - h / 2, w, h, 4); else ctx.rect(x, y - h / 2, w, h);
@@ -265,8 +279,8 @@
         ctx.fillStyle = textColor;
         ctx.fillText(p.toFixed(2), x + 6, y + .5);
       };
-      chipAt(last.a, -off, C.ask, '#1B0D09');
-      chipAt(last.b, off, C.bid, '#080D22');
+      chipAt(last.a, chipY.a, C.ask, '#1B0D09');
+      chipAt(last.b, chipY.b, C.bid, '#080D22');
     }
 
     function loop(now) {
@@ -300,51 +314,116 @@
 
   /* ───────────── 2. Page behaviour ───────────── */
 
+  window.__site = true;
+  const root = document.documentElement;
   const top = document.querySelector('.top');
   const name = document.querySelector('.name');
+
+  // First paint: wait for the type so the hero does not jump, but never for long.
+  const ready = () => root.classList.add('ready');
+  if (reduceMotion || !document.fonts || !document.fonts.ready) ready();
+  else { document.fonts.ready.then(ready); setTimeout(ready, 900); }
 
   if (top && name && 'IntersectionObserver' in window) {
     new IntersectionObserver((es) => {
       top.classList.toggle('past-name', !es[0].isIntersecting);
     }, { rootMargin: '-64px 0px 0px 0px' }).observe(name);
-
-    const onScroll = () => top.classList.toggle('is-stuck', window.scrollY > 8);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
   } else if (top) {
     top.classList.add('past-name');
   }
 
-  // Current section in the nav.
+  // Current section in the nav. One marker glides between the items.
+  const nav = document.querySelector('.sections');
   const links = [...document.querySelectorAll('.sections a')];
   const byId = new Map(links.map((a) => [a.getAttribute('href').slice(1), a]));
-  if ('IntersectionObserver' in window) {
-    const io = new IntersectionObserver((es) => {
-      for (const e of es) {
-        if (!e.isIntersecting) continue;
-        let id = e.target.id;
-        // "About" has no pill on small screens; keep Projects lit instead.
-        links.forEach((a) => a.removeAttribute('aria-current'));
-        const a = byId.get(id);
-        if (a) a.setAttribute('aria-current', 'true');
-      }
-    }, { rootMargin: '-40% 0px -55% 0px' });
-    document.querySelectorAll('main section[id]').forEach((sec) => io.observe(sec));
+  const sections = [...document.querySelectorAll('main section[id]')];
+  let current = null, locked = false, unlockTimer = 0, ind = null;
 
-    const hero = document.querySelector('.hero');
-    if (hero) new IntersectionObserver((es) => {
-      if (!es[0].isIntersecting) return;
-      links.forEach((a) => a.removeAttribute('aria-current'));
-      const home = byId.get('top');
-      if (home) home.setAttribute('aria-current', 'true');
-    }, { rootMargin: '-40% 0px -55% 0px' }).observe(hero);
+  if (nav) {
+    ind = document.createElement('span');
+    ind.className = 'nav-ind';
+    ind.setAttribute('aria-hidden', 'true');
+    nav.appendChild(ind);
   }
 
-  // Reveal on scroll.
+  // The link the marker sits on. "About" has no place in the phone pill,
+  // so the marker stays on the item before it.
+  const litFor = (id) => {
+    let i = links.indexOf(byId.get(id));
+    while (i >= 0 && links[i].offsetParent === null) i--;
+    return i >= 0 ? links[i] : null;
+  };
+
+  const paintNav = () => {
+    const lit = litFor(current);
+    links.forEach((a) => {
+      a.classList.toggle('is-lit', a === lit);
+      if (a === byId.get(current)) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+    if (!ind) return;
+    if (!lit) { ind.style.opacity = '0'; return; }
+    ind.style.setProperty('--ix', lit.offsetLeft + 'px');
+    ind.style.setProperty('--iw', lit.offsetWidth + 'px');
+    ind.classList.toggle('is-home', lit.classList.contains('home'));
+    ind.style.opacity = '1';
+    // Place it once without motion; glide from then on.
+    if (!ind.classList.contains('on')) requestAnimationFrame(() => requestAnimationFrame(() => ind.classList.add('on')));
+  };
+
+  const setCurrent = (id) => { if (id !== current) { current = id; paintNav(); } };
+
+  const probe = () => {
+    const line = window.innerHeight * 0.42;
+    let id = 'top';
+    for (const sec of sections) if (sec.getBoundingClientRect().top <= line) id = sec.id;
+    const atEnd = window.innerHeight + window.scrollY >= root.scrollHeight - 2;
+    return atEnd && sections.length ? sections[sections.length - 1].id : id;
+  };
+
+  let queued = false;
+  const onScroll = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      if (top) top.classList.toggle('is-stuck', window.scrollY > 8);
+      if (!locked) setCurrent(probe());
+    });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => requestAnimationFrame(paintNav));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(paintNav);
+
+  // A click on an in-page link moves the marker straight to its target, and the
+  // sections scrolled past on the way do not pull it back.
+  const unlock = () => { locked = false; clearTimeout(unlockTimer); setCurrent(probe()); };
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const hash = a.getAttribute('href').slice(1);
+    const target = hash && hash !== 'top' ? document.getElementById(hash) : null;
+    const sec = target && target.closest('section[id]');
+    setCurrent(sec ? sec.id : 'top');
+    locked = true;
+    clearTimeout(unlockTimer);
+    unlockTimer = setTimeout(unlock, 1400);
+  });
+  window.addEventListener('scrollend', () => { if (locked) unlock(); });
+
+  if (top) top.classList.toggle('is-stuck', window.scrollY > 8);
+  setCurrent(probe());
+
+  // Reveal on scroll. Items that arrive together follow one another by a beat.
   const reveals = document.querySelectorAll('.reveal');
   if ('IntersectionObserver' in window && !reduceMotion) {
     const ro = new IntersectionObserver((es) => {
-      for (const e of es) if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); }
+      let k = 0;
+      for (const e of es) {
+        if (!e.isIntersecting) continue;
+        e.target.style.transitionDelay = Math.min(k++, 4) * 70 + 'ms';
+        e.target.classList.add('in');
+        ro.unobserve(e.target);
+      }
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
     reveals.forEach((n) => ro.observe(n));
   } else {
